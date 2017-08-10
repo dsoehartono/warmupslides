@@ -1,0 +1,163 @@
+---
+title       : DIVACTORY01 Report Slides
+subtitle    : Minimizing Negative Log-Loss Function
+author      : Djoko Soehartono and M. Farhan Rashid
+job         : Competition Participants
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : mathjax            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## Executive Summary
+
+In this DIVACTORY 01 Warm Up case study, we are given `Training_Data.csv` and `Test_Data.csv` CSV data files for training and test data correspondingly. 
+
+Objectives for this case study are:
+
+1. Develop an exploratory data analysis based on given training and test datasets
+2. Develop a model to minimize negative log-loss function
+3. Document the mmodel results in a documentation and slides
+
+
+---
+
+## Data Processing
+
+Extract the `Training_Data` and `Test_Data` datasets:
+```{r, results='hide'}
+Training_Data <- read.csv("Training_Data.csv", header = TRUE, sep = ",")
+Test_Data <- read.csv("Test_Data.csv", header = TRUE, sep = ",")
+```
+
+---
+
+## Exploratory Data Analysis - Looking at Training Data
+```{r}
+str(Training_Data)
+```
+
+---
+
+## Exploratory Data Analysis - Testing Data, Output as Factor
+
+```{r, results='hide'}
+str(Test_Data)
+Training_Data$target <- as.factor(Training_Data$target)
+```
+
+---
+
+## Exploratory Data Analysis - Range of Values in Input Variables
+
+```{r}
+summary(Training_Data)
+```
+
+---
+
+## Exploratory Data Analysis - Scatterplot between Variables
+
+```{r, echo=FALSE}
+library(graphics)
+pairs(~ peubah1+peubah2+peubah3+peubah4+peubah5+peubah6+peubah7+target, 
+      data = Training_Data, main = "peubah1 to peubah7 + target", 
+      col = 3 + (Training_Data$target == 1), upper.panel = NULL)
+```
+
+---
+
+## Exploratory Data Analysis - Cross Correlations
+
+```{r, echo=FALSE}
+library(corrplot)
+corrplot(cor(Training_Data[,-22]), type = "lower", method = "square")
+```
+
+---
+
+## Exploratory Data Analysis - Input Variables
+```{r, echo=FALSE}
+library(purrr)
+library(tidyr)
+library(ggplot2)
+
+Training_Data[ ,-22] %>%
+  keep(is.numeric) %>%
+  gather %>%
+  ggplot(aes(value)) +
+  facet_wrap(~key, scales = "free", nrow = 2, ncol = 7) +
+  geom_histogram(alpha = .6, fill = "navy", binwidth = 0.01, aes(y = ..density..))
+```
+
+---
+
+## Exploratory Data Analysis - # of 0 and 1 Outputs
+```{r, echo=FALSE}
+g <- ggplot(data = Training_Data, aes(x = target))
+g + geom_bar(fill = "navy", alpha = .6) + ggtitle("Count of '0' and '1' in target")
+```
+
+---
+
+## Overview of Negative Log-Loss Function
+Logarithmic Loss, or simply Log Loss, is a classification loss function often used as an evaluation metric for classifiers
+$$logloss = - \frac{1}{N} \sum_{i=1}^{N} \sum_{j=1}^M y_{i,j} \log (p_{i,j})$$
+
+If there are only two classes then the expression above simplifies to
+$$logloss = - \frac{1}{N} \sum_{i=1}^{N} [y_i \log p_i + (1-y_i) \log (1 - p_i)]$$
+
+---
+
+## Model 1 - Logistic Regression
+
+```{r, message=FALSE}
+library(caret)
+library(MLmetrics)
+library(stats)
+glm.model <- train(target ~ ., data = Training_Data, method = "glm", family = "binomial")
+(glm.ll_train <- LogLoss(y_true = as.numeric(Training_Data$target)-1, 
+                               y_pred = glm.model$finalModel$fitted.values))
+glm.pred_train <- predict(glm.model$finalModel, Training_Data, type = "response")
+glm.pred_train <- ifelse(glm.pred_train > 0.5, 1, 0)
+(MissClassifError <- mean(glm.pred_train != Training_Data$target))
+```
+
+---
+
+## Model 2 - Logistic Regression with PCA
+
+```{r, message=FALSE}
+glm2.model <- train(target ~ ., data = Training_Data, method = "glm",
+                    family = "binomial", preProcess = "pca")
+(glm2.ll_train <- LogLoss(y_true = as.numeric(Training_Data$target)-1,
+                         y_pred = glm2.model$finalModel$fitted.values))
+glm2.pred_train <- predict(glm2.model, Training_Data, type = "prob")[,2]
+glm2.pred_train <- ifelse(glm2.pred_train > 0.5, 1, 0)
+(MissClassifError <- mean(glm2.pred_train != Training_Data$target))
+```
+
+---
+
+## Model 3 - LDA
+
+```{r, message=FALSE}
+lda.model <- train(target ~ ., data = Training_Data, method = "lda")
+lda.pred_train <- predict(lda.model, Training_Data, type = "prob")[,2]
+(lda.ll_train <- LogLoss(y_true = as.numeric(Training_Data$target)-1,
+                        y_pred = lda.pred_train))
+lda.pred_train <- ifelse(lda.pred_train > 0.5, 1, 0)
+(MissClassifError <- mean(lda.pred_train != Training_Data$target))
+```
+
+---
+
+## Analysis and Conclusion
+
+1. Input variables in `Training_Data` are almost i.i.d
+
+2. Probability of output `1` is about 0.5, hence probability of output `0` is also about 0.5
+
+3. Negative log-loss function given this `Training_Data` set for different models are almost similar, at about 0.69. We can approximate this value by taking $p_i$ = 0.5 and $y_i$ = 1 to our binary log-loss function

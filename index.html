@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DIVACTORY01 Report Slides</title>
+  <meta charset="utf-8">
+  <meta name="description" content="DIVACTORY01 Report Slides">
+  <meta name="author" content="Djoko Soehartono and M. Farhan Rashid">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>DIVACTORY01 Report Slides</h1>
+    <h2>Minimizing Negative Log-Loss Function</h2>
+    <p>Djoko Soehartono and M. Farhan Rashid<br/>Competition Participants</p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h2>Executive Summary</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>In this DIVACTORY 01 Warm Up case study, we are given <code>Training_Data.csv</code> and <code>Test_Data.csv</code> CSV data files for training and test data correspondingly. </p>
+
+<p>Objectives for this case study are:</p>
+
+<ol>
+<li>Develop an exploratory data analysis based on given training and test datasets</li>
+<li>Develop a model to minimize negative log-loss function</li>
+<li>Document the mmodel results in a documentation and slides</li>
+</ol>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-2" style="background:;">
+  <hgroup>
+    <h2>Data Processing</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Extract the <code>Training_Data</code> and <code>Test_Data</code> datasets:</p>
+
+<pre><code class="r">Training_Data &lt;- read.csv(&quot;Training_Data.csv&quot;, header = TRUE, sep = &quot;,&quot;)
+Test_Data &lt;- read.csv(&quot;Test_Data.csv&quot;, header = TRUE, sep = &quot;,&quot;)
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  <hgroup>
+    <h2>Exploratory Data Analysis - Looking at Training Data</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">str(Training_Data)
+</code></pre>
+
+<pre><code>## &#39;data.frame&#39;:    21681 obs. of  22 variables:
+##  $ peubah1 : num  0.416 0.393 0.412 0.416 0.431 ...
+##  $ peubah2 : num  0.434 0.461 0.464 0.434 0.461 ...
+##  $ peubah3 : num  0.48 0.453 0.418 0.483 0.419 ...
+##  $ peubah4 : num  0.391 0.405 0.455 0.358 0.45 ...
+##  $ peubah5 : num  0.312 0.377 0.415 0.308 0.409 ...
+##  $ peubah6 : num  0.35 0.393 0.418 0.342 0.45 ...
+##  $ peubah7 : num  0.48 0.407 0.336 0.501 0.371 ...
+##  $ peubah8 : num  0.367 0.409 0.397 0.376 0.372 ...
+##  $ peubah9 : num  0.297 0.256 0.359 0.271 0.324 ...
+##  $ peubah10: num  0.408 0.491 0.497 0.422 0.458 ...
+##  $ peubah11: num  0.328 0.368 0.404 0.319 0.404 ...
+##  $ peubah12: num  0.377 0.429 0.452 0.367 0.438 ...
+##  $ peubah13: num  0.346 0.358 0.396 0.339 0.404 ...
+##  $ peubah14: num  0.519 0.479 0.413 0.538 0.423 ...
+##  $ peubah15: num  0.462 0.447 0.368 0.476 0.394 ...
+##  $ peubah16: num  0.352 0.335 0.389 0.342 0.388 ...
+##  $ peubah17: num  0.455 0.446 0.415 0.458 0.408 ...
+##  $ peubah18: num  0.481 0.452 0.413 0.491 0.412 ...
+##  $ peubah19: num  0.442 0.422 0.359 0.455 0.391 ...
+##  $ peubah20: num  0.382 0.376 0.373 0.392 0.367 ...
+##  $ peubah21: num  0.361 0.305 0.299 0.37 0.322 ...
+##  $ target  : int  1 0 0 1 1 1 0 1 1 0 ...
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h2>Exploratory Data Analysis - Testing Data, Output as Factor</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">str(Test_Data)
+Training_Data$target &lt;- as.factor(Training_Data$target)
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-5" style="background:;">
+  <hgroup>
+    <h2>Exploratory Data Analysis - Range of Values in Input Variables</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">summary(Training_Data)
+</code></pre>
+
+<pre><code>##     peubah1          peubah2          peubah3           peubah4      
+##  Min.   :0.0000   Min.   :0.0265   Min.   :0.08678   Min.   :0.0000  
+##  1st Qu.:0.3758   1st Qu.:0.3918   1st Qu.:0.43228   1st Qu.:0.3426  
+##  Median :0.4052   Median :0.4346   Median :0.46691   Median :0.3827  
+##  Mean   :0.4041   Mean   :0.4285   Mean   :0.46388   Mean   :0.3785  
+##  3rd Qu.:0.4363   3rd Qu.:0.4720   3rd Qu.:0.49945   3rd Qu.:0.4191  
+##  Max.   :0.6808   Max.   :0.6661   Max.   :0.68957   Max.   :0.6288  
+##     peubah5           peubah6           peubah7           peubah8       
+##  Min.   :0.01573   Min.   :0.06821   Min.   :0.04294   Min.   :0.06272  
+##  1st Qu.:0.31949   1st Qu.:0.36199   1st Qu.:0.39151   1st Qu.:0.36220  
+##  Median :0.35690   Median :0.40701   Median :0.43157   Median :0.39411  
+##  Mean   :0.35554   Mean   :0.40325   Mean   :0.42613   Mean   :0.39331  
+##  3rd Qu.:0.39357   3rd Qu.:0.44870   3rd Qu.:0.46296   3rd Qu.:0.42481  
+##  Max.   :0.59906   Max.   :0.69315   Max.   :0.66133   Max.   :0.69315  
+##     peubah9            peubah10         peubah11       
+##  Min.   :0.005346   Min.   :0.0000   Min.   :0.001948  
+##  1st Qu.:0.242413   1st Qu.:0.4130   1st Qu.:0.308727  
+##  Median :0.283388   Median :0.4519   Median :0.347334  
+##  Mean   :0.288719   Mean   :0.4461   Mean   :0.345317  
+##  3rd Qu.:0.330045   3rd Qu.:0.4859   3rd Qu.:0.384664  
+##  Max.   :0.679363   Max.   :0.6655   Max.   :0.630127  
+##     peubah12            peubah13           peubah14         peubah15     
+##  Min.   :0.0007097   Min.   :0.007948   Min.   :0.1275   Min.   :0.0646  
+##  1st Qu.:0.3475252   1st Qu.:0.321467   1st Qu.:0.4516   1st Qu.:0.3957  
+##  Median :0.3905207   Median :0.354438   Median :0.4861   Median :0.4352  
+##  Mean   :0.3862154   Mean   :0.353111   Mean   :0.4830   Mean   :0.4297  
+##  3rd Qu.:0.4291426   3rd Qu.:0.387220   3rd Qu.:0.5171   3rd Qu.:0.4688  
+##  Max.   :0.6603450   Max.   :0.651168   Max.   :0.6929   Max.   :0.6636  
+##     peubah16          peubah17          peubah18         peubah19       
+##  Min.   :0.01702   Min.   :0.06889   Min.   :0.1159   Min.   :0.001149  
+##  1st Qu.:0.30723   1st Qu.:0.42082   1st Qu.:0.4327   1st Qu.:0.387125  
+##  Median :0.34110   Median :0.45101   Median :0.4671   Median :0.425967  
+##  Mean   :0.34021   Mean   :0.44853   Mean   :0.4646   Mean   :0.420817  
+##  3rd Qu.:0.37417   3rd Qu.:0.47993   3rd Qu.:0.4996   3rd Qu.:0.456107  
+##  Max.   :0.62958   Max.   :0.69082   Max.   :0.6912   Max.   :0.659270  
+##     peubah20          peubah21       target   
+##  Min.   :0.06297   Min.   :0.03861   0:10756  
+##  1st Qu.:0.36750   1st Qu.:0.31216   1:10925  
+##  Median :0.39835   Median :0.35353            
+##  Mean   :0.39924   Mean   :0.35739            
+##  3rd Qu.:0.43211   3rd Qu.:0.40094            
+##  Max.   :0.65263   Max.   :0.69315
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-6" style="background:;">
+  <hgroup>
+    <h2>Exploratory Data Analysis - Scatterplot between Variables</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><img src="assets/fig/unnamed-chunk-5-1.png" alt="plot of chunk unnamed-chunk-5"></p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-7" style="background:;">
+  <hgroup>
+    <h2>Exploratory Data Analysis - Cross Correlations</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><img src="assets/fig/unnamed-chunk-6-1.png" alt="plot of chunk unnamed-chunk-6"></p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-8" style="background:;">
+  <hgroup>
+    <h2>Exploratory Data Analysis - Input Variables</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code>## Error: nrow * ncol &gt;= n is not TRUE
+</code></pre>
+
+<p><img src="assets/fig/unnamed-chunk-7-1.png" alt="plot of chunk unnamed-chunk-7"></p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-9" style="background:;">
+  <hgroup>
+    <h2>Exploratory Data Analysis - # of 0 and 1 Outputs</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><img src="assets/fig/unnamed-chunk-8-1.png" alt="plot of chunk unnamed-chunk-8"></p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-10" style="background:;">
+  <hgroup>
+    <h2>Overview of Negative Log-Loss Function</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Logarithmic Loss, or simply Log Loss, is a classification loss function often used as an evaluation metric for classifiers
+\[logloss = - \frac{1}{N} \sum_{i=1}^{N} \sum_{j=1}^M y_{i,j} \log (p_{i,j})\]</p>
+
+<p>If there are only two classes then the expression above simplifies to
+\[logloss = - \frac{1}{N} \sum_{i=1}^{N} [y_i \log p_i + (1-y_i) \log (1 - p_i)]\]</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-11" style="background:;">
+  <hgroup>
+    <h2>Model 1 - Logistic Regression</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">library(caret)
+library(MLmetrics)
+library(stats)
+glm.model &lt;- train(target ~ ., data = Training_Data, method = &quot;glm&quot;, family = &quot;binomial&quot;)
+(glm.ll_train &lt;- LogLoss(y_true = as.numeric(Training_Data$target)-1, 
+                               y_pred = glm.model$finalModel$fitted.values))
+</code></pre>
+
+<pre><code>## [1] 0.6912029
+</code></pre>
+
+<pre><code class="r">glm.pred_train &lt;- predict(glm.model$finalModel, Training_Data, type = &quot;response&quot;)
+glm.pred_train &lt;- ifelse(glm.pred_train &gt; 0.5, 1, 0)
+(MissClassifError &lt;- mean(glm.pred_train != Training_Data$target))
+</code></pre>
+
+<pre><code>## [1] 0.4742862
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-12" style="background:;">
+  <hgroup>
+    <h2>Model 2 - Logistic Regression with PCA</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">glm2.model &lt;- train(target ~ ., data = Training_Data, method = &quot;glm&quot;,
+                    family = &quot;binomial&quot;, preProcess = &quot;pca&quot;)
+(glm2.ll_train &lt;- LogLoss(y_true = as.numeric(Training_Data$target)-1,
+                         y_pred = glm2.model$finalModel$fitted.values))
+</code></pre>
+
+<pre><code>## [1] 0.692582
+</code></pre>
+
+<pre><code class="r">glm2.pred_train &lt;- predict(glm2.model, Training_Data, type = &quot;prob&quot;)[,2]
+glm2.pred_train &lt;- ifelse(glm2.pred_train &gt; 0.5, 1, 0)
+(MissClassifError &lt;- mean(glm2.pred_train != Training_Data$target))
+</code></pre>
+
+<pre><code>## [1] 0.4862783
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-13" style="background:;">
+  <hgroup>
+    <h2>Model 3 - LDA</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">lda.model &lt;- train(target ~ ., data = Training_Data, method = &quot;lda&quot;)
+lda.pred_train &lt;- predict(lda.model, Training_Data, type = &quot;prob&quot;)[,2]
+(lda.ll_train &lt;- LogLoss(y_true = as.numeric(Training_Data$target)-1,
+                        y_pred = lda.pred_train))
+</code></pre>
+
+<pre><code>## [1] 0.6912032
+</code></pre>
+
+<pre><code class="r">lda.pred_train &lt;- ifelse(lda.pred_train &gt; 0.5, 1, 0)
+(MissClassifError &lt;- mean(lda.pred_train != Training_Data$target))
+</code></pre>
+
+<pre><code>## [1] 0.474194
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-14" style="background:;">
+  <hgroup>
+    <h2>Analysis and Conclusion</h2>
+  </hgroup>
+  <article data-timings="">
+    <ol>
+<li><p>Input variables in <code>Training_Data</code> are almost i.i.d</p></li>
+<li><p>Probability of output <code>1</code> is about 0.5, hence probability of output <code>0</code> is also about 0.5</p></li>
+<li><p>Negative log-loss function given this <code>Training_Data</code> set for different models are almost similar, at about 0.69. We can approximate this value by taking \(p_i\) = 0.5 and \(y_i\) = 1 to our binary log-loss function</p></li>
+</ol>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='Executive Summary'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='Data Processing'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='Exploratory Data Analysis - Looking at Training Data'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='Exploratory Data Analysis - Testing Data, Output as Factor'>
+         4
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=5 title='Exploratory Data Analysis - Range of Values in Input Variables'>
+         5
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=6 title='Exploratory Data Analysis - Scatterplot between Variables'>
+         6
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=7 title='Exploratory Data Analysis - Cross Correlations'>
+         7
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=8 title='Exploratory Data Analysis - Input Variables'>
+         8
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=9 title='Exploratory Data Analysis - # of 0 and 1 Outputs'>
+         9
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=10 title='Overview of Negative Log-Loss Function'>
+         10
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=11 title='Model 1 - Logistic Regression'>
+         11
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=12 title='Model 2 - Logistic Regression with PCA'>
+         12
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=13 title='Model 3 - LDA'>
+         13
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=14 title='Analysis and Conclusion'>
+         14
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <!-- MathJax: Fall back to local if CDN offline but local image fonts are not supported (saves >100MB) -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        processEscapes: true
+      }
+    });
+  </script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <!-- <script src="https://c328740.ssl.cf1.rackcdn.com/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script> -->
+  <script>window.MathJax || document.write('<script type="text/x-mathjax-config">MathJax.Hub.Config({"HTML-CSS":{imageFont:null}});<\/script><script src="libraries/widgets/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"><\/script>')
+</script>
+<!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>
